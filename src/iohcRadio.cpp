@@ -64,6 +64,9 @@ namespace IOHC {
         bool preamble = digitalRead(RADIO_PREAMBLE_DETECTED);
         bool payload = digitalRead(RADIO_PACKET_AVAIL);
 
+        iohcRadio::txComplete = true;
+        ets_printf("TX: TX-RX DONE detected, flag set\n");
+
         if (payload) {
             // When in TX state DIO0 is mapped to PacketSent, otherwise it
             // signals PayloadReady. Use the current radio state to disambiguate
@@ -186,11 +189,11 @@ namespace IOHC {
         if (radioState == iohcRadio::RadioState::PAYLOAD) {
             // if TX ready?
             if (_flags[0] & RF_IRQFLAGS1_TXREADY) {
-                // Radio::clearFlags();
-                // if (radioState != iohcRadio::RadioState::TX) {
-                //     Radio::setRx();
-                //     radio->setRadioState(iohcRadio::RadioState::RX);
-                // }
+                Radio::clearFlags();
+                if (radioState != iohcRadio::RadioState::TX) {
+                    Radio::setRx();
+                    radio->setRadioState(iohcRadio::RadioState::RX);
+                }
                 return;
             }
             // if in RX mode?
